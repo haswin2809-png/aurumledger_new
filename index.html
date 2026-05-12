@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AurumLedger — Private Wealth Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">⚜ AurumLedger</div>
+  <div class="loading-bar-track" style="margin-top:20px">
+    <div class="loading-bar-fill"></div>
+  </div>
+</div>
+
+<!-- MOBILE MENU BUTTON -->
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="layout">
+
+  <!-- ======================== SIDEBAR ======================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">⚜</div>
+        <div>
+          <div class="logo-text">AurumLedger</div>
+          <div class="logo-sub">Wealth Dashboard</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" onclick="navigate('dashboard', this)">
+          <span class="nav-icon">◈</span> Dashboard
+        </div>
+        <div class="nav-item" onclick="navigate('monthly', this)">
+          <span class="nav-icon">📅</span> Monthly Records
+        </div>
+      </div>
+      <div class="nav-section" style="margin-top:8px">
+        <div class="nav-label">Management</div>
+        <div class="nav-item" onclick="navigate('transactions', this)">
+          <span class="nav-icon">⇄</span> Transactions
+        </div>
+        <div class="nav-item" onclick="navigate('bills', this)">
+          <span class="nav-icon">🔔</span> EMI &amp; Bills
+        </div>
+        <div class="nav-item" onclick="navigate('goals', this)">
+          <span class="nav-icon">◎</span> Savings Goals
+        </div>
+      </div>
+      <div class="nav-section" style="margin-top:8px">
+        <div class="nav-label">Intelligence</div>
+        <div class="nav-item" onclick="navigate('analytics', this)">
+          <span class="nav-icon">◻</span> Analytics
+        </div>
+        <div class="nav-item" onclick="navigate('annual', this)">
+          <span class="nav-icon">📊</span> Annual Reports
+        </div>
+      </div>
+      <div class="nav-section" style="margin-top:8px">
+        <div class="nav-label">System</div>
+        <div class="nav-item" onclick="navigate('settings', this)">
+          <span class="nav-icon">⚙</span> Settings
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-label">Fiscal Year</div>
+      <div class="sidebar-year" id="sidebarYear">2026</div>
+      <!-- Feature 4: User info + logout -->
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-email" id="sidebarUserEmail">Loading email...</div>
+        <button class="btn-logout" onclick="logoutUser()">⎋ Sign Out</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ======================== MAIN ======================== -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 id="pageTitle">Dashboard</h2>
+        <p id="pageSubtitle">Your financial overview at a glance</p>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-date" id="topbarDate"></span>
+        <button class="btn-add" onclick="openTxnModal()">+ Add Transaction</button>
+      </div>
+    </header>
+
+    <!-- ======================== DASHBOARD PAGE ======================== -->
+    <div class="page active" id="page-dashboard">
+      <div class="content">
+
+        <!-- STAT CARDS -->
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-icon">◈</div>
+            <div class="stat-label">Current Balance</div>
+            <div class="stat-val gold" id="dashBalance">—</div>
+            <div class="stat-change" id="dashBalanceSub">No transactions yet</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">↑</div>
+            <div class="stat-label">Monthly Income</div>
+            <div class="stat-val green" id="dashIncome">—</div>
+            <div class="stat-change" id="dashIncomeSub">This month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">↓</div>
+            <div class="stat-label">Monthly Expenses</div>
+            <div class="stat-val red" id="dashExpense">—</div>
+            <div class="stat-change" id="dashExpenseSub">This month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⊛</div>
+            <div class="stat-label">Net Savings</div>
+            <div class="stat-val" id="dashSavings">—</div>
+            <div class="stat-change" id="dashSavingsSub">This month</div>
+          </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="grid-2">
+          <!-- RECENT TRANSACTIONS -->
+          <div class="card col-span-2">
+            <div class="section-title">
+              Recent Transactions
+              <span onclick="navigate('transactions', null)">View All →</span>
+            </div>
+            <div id="recentTxns">
+              <div class="empty-state">
+                <div class="empty-icon">⇄</div>
+                <div class="empty-title">No Records Available</div>
+                <div class="empty-sub">Add your first transaction to begin tracking your finances.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- UPCOMING BILLS -->
+          <div class="card">
+            <div class="section-title">
+              Upcoming Bills
+              <span onclick="navigate('bills', null)">Manage →</span>
+            </div>
+            <div id="dashBills">
+              <div class="empty-state" style="padding:28px 20px">
+                <div class="empty-icon">🔔</div>
+                <div class="empty-title">No Bills Added</div>
+                <div class="empty-sub">Add recurring bills &amp; EMIs to track due dates.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MONTHLY OVERVIEW CHART -->
+          <div class="card">
+            <div class="section-title">Monthly Overview</div>
+            <div id="dashChartWrap">
+              <div class="no-data-chart">
+                <div class="nd-icon">◻</div>
+                <span>No data to visualize yet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================== TRANSACTIONS PAGE ======================== -->
+    <div class="page" id="page-transactions">
+      <div class="content">
+        <!-- Feature 1: Export dropdown in filter bar -->
+        <div class="filter-bar" id="txnFilterBar">
+          <button class="filter-btn active" onclick="filterTxns('all', this)">All</button>
+          <button class="filter-btn" onclick="filterTxns('income', this)">Income</button>
+          <button class="filter-btn" onclick="filterTxns('expense', this)">Expenses</button>
+          <div style="margin-left:auto">
+            <div class="export-dropdown">
+              <button class="btn-ghost" style="padding:6px 14px;font-size:12px" onclick="toggleExportMenu('txnExportMenu')">↓ Export ▾</button>
+              <div class="export-menu" id="txnExportMenu">
+                <div class="export-menu-item" onclick="exportTransactionsCSV(txnFilter)">📊 Export as CSV</div>
+                <div class="export-menu-item" onclick="exportTransactionsPDF(txnFilter)">📄 Export as PDF</div>
+                <div class="export-menu-item" onclick="exportTransactionsJSON(txnFilter)">📋 Export as JSON</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div id="allTxnsTable">
+            <div class="empty-state">
+              <div class="empty-icon">⇄</div>
+              <div class="empty-title">No Records Available</div>
+              <div class="empty-sub">Click "Add Transaction" above to record your first entry.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== MONTHLY RECORDS PAGE ======================== -->
+    <div class="page" id="page-monthly">
+      <div class="content">
+        <div id="monthlyAccordions">
+          <div class="empty-state" style="padding:80px 20px">
+            <div class="empty-icon">📅</div>
+            <div class="empty-title">No Monthly Records</div>
+            <div class="empty-sub">Records will appear automatically as you add transactions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== BILLS PAGE ======================== -->
+    <div class="page" id="page-bills">
+      <div class="content">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:18px">
+          <button class="btn-add" onclick="openBillModal()">+ Add Bill / EMI</button>
+        </div>
+        <div class="card">
+          <div id="billsList">
+            <div class="empty-state">
+              <div class="empty-icon">🔔</div>
+              <div class="empty-title">No Bills Added</div>
+              <div class="empty-sub">Add your recurring payments — rent, subscriptions, insurance &amp; more.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== GOALS PAGE ======================== -->
+    <div class="page" id="page-goals">
+      <div class="content">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:18px">
+          <button class="btn-add" onclick="openGoalModal()">+ Create Goal</button>
+        </div>
+        <div id="goalsGrid" class="goals-grid">
+          <div class="card" style="grid-column:1/-1">
+            <div class="empty-state">
+              <div class="empty-icon">◎</div>
+              <div class="empty-title">No Goals Added</div>
+              <div class="empty-sub">Create custom savings goals and track your progress over time.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== ANALYTICS PAGE ======================== -->
+    <div class="page" id="page-analytics">
+      <div class="content">
+        <div class="grid-2" style="margin-bottom:24px">
+          <div class="card">
+            <div class="section-title">Income vs Expenses</div>
+            <div class="chart-wrap" id="analyticsIEWrap">
+              <div class="no-data-chart"><div class="nd-icon">◻</div><span>Add transactions to see analytics</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">Expense Categories</div>
+            <div class="chart-wrap" id="analyticsCatWrap">
+              <div class="no-data-chart"><div class="nd-icon">◻</div><span>Add expense transactions to see distribution</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="section-title">Savings Trend</div>
+            <div class="chart-wrap" id="analyticsSavingsWrap">
+              <div class="no-data-chart"><div class="nd-icon">◻</div><span>Savings data will appear here</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">Expense Trend</div>
+            <div class="chart-wrap" id="analyticsExpWrap">
+              <div class="no-data-chart"><div class="nd-icon">◻</div><span>Expense trend will appear here</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== ANNUAL REPORT PAGE ======================== -->
+    <div class="page" id="page-annual">
+      <div class="content">
+        <div class="grid-3" style="margin-bottom:24px">
+          <div class="report-highlight" style="grid-column:span 1">
+            <div class="report-year" id="reportYear">—</div>
+            <div class="report-sub">Annual Summary</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Total Yearly Income</div>
+            <div class="stat-val green" id="annualIncome">—</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Total Yearly Expenses</div>
+            <div class="stat-val red" id="annualExpense">—</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Net Savings</div>
+            <div class="stat-val gold" id="annualSavings">—</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Highest Spending Month</div>
+            <div class="stat-val" id="annualHighMonth" style="font-size:20px">—</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:24px">
+          <!-- Feature 1: Annual export dropdown -->
+          <div class="section-title">
+            Monthly Income vs Expenses — Full Year
+            <div class="export-dropdown">
+              <button class="btn-ghost" style="padding:5px 12px;font-size:11px" onclick="toggleExportMenu('annualExportMenu')">↓ Export ▾</button>
+              <div class="export-menu" id="annualExportMenu">
+                <div class="export-menu-item" onclick="exportAnnualCSV()">📊 Export as CSV</div>
+                <div class="export-menu-item" onclick="exportAnnualJSON()">📋 Export as JSON</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrap" id="annualChartWrap">
+            <div class="no-data-chart"><div class="nd-icon">◻</div><span>Add transactions to generate annual report</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Category Analysis</div>
+          <div id="annualCatAnalysis">
+            <div class="empty-state" style="padding:32px">
+              <div class="empty-sub">Category breakdown will appear here once transactions are added.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== SETTINGS PAGE ======================== -->
+    <div class="page" id="page-settings">
+      <div class="content" style="max-width:640px">
+        <div class="card">
+          <div class="settings-section">
+            <div class="settings-section-title">General Preferences</div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Currency Symbol</div>
+                <div class="settings-desc">Used throughout the dashboard</div>
+              </div>
+              <select class="form-select" style="width:100px" id="settingCurrency" onchange="saveSetting('currency',this.value)">
+                <option value="₹">₹ INR</option>
+                <option value="$">$ USD</option>
+                <option value="€">€ EUR</option>
+                <option value="£">£ GBP</option>
+                <option value="¥">¥ JPY</option>
+                <option value="₩">₩ KRW</option>
+                <option value="A$">A$ AUD</option>
+                <option value="C$">C$ CAD</option>
+                <option value="CHF">CHF</option>
+                <option value="AED">AED</option>
+              </select>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Fiscal Year</div>
+                <div class="settings-desc">Current year for reporting</div>
+              </div>
+              <input type="number" class="form-input" style="width:100px" id="settingYear" min="2000" max="2100" onchange="saveSetting('year',this.value)">
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Your Name</div>
+                <div class="settings-desc">Shown on reports</div>
+              </div>
+              <input type="text" class="form-input" style="width:180px" id="settingName" placeholder="Your name" onchange="saveSetting('name',this.value)">
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Custom Categories</div>
+            <div class="settings-desc" style="margin-bottom:14px">Add your own expense / income categories</div>
+            <div id="customCatChips"></div>
+            <div style="display:flex;gap:10px;margin-top:14px">
+              <input type="text" class="form-input" id="newCatInput" placeholder="e.g. Dining, Freelance..." style="flex:1">
+              <button class="btn-primary" onclick="addCustomCat()">Add</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Data Management</div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Export All Data</div>
+                <div class="settings-desc">Download full backup as JSON</div>
+              </div>
+              <button class="btn-ghost" onclick="exportData()">Export JSON</button>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Clear All Data</div>
+                <div class="settings-desc">Permanently remove all records</div>
+              </div>
+              <button class="btn-danger" onclick="clearAllData()">Clear Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /.layout -->
+
+<!-- ======================== ADD TRANSACTION MODAL ======================== -->
+<div class="modal-overlay" id="txnModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Add Transaction</h3>
+      <button class="modal-close" onclick="closeTxnModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="type-toggle">
+        <button class="type-btn active-income" id="typeIncome" onclick="setTxnType('income')">↑ Income</button>
+        <button class="type-btn" id="typeExpense" onclick="setTxnType('expense')">↓ Expense</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Amount</label>
+          <input type="number" class="form-input" id="txnAmount" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" id="txnDate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" class="form-input" id="txnDesc" placeholder="e.g. Salary, Grocery shopping...">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="txnCategory">
+            <option value="">Select category</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select class="form-select" id="txnMethod">
+            <option value="">Select method</option>
+            <option>Cash</option>
+            <option>Bank Transfer</option>
+            <option>Credit Card</option>
+            <option>Debit Card</option>
+            <option>UPI / Digital Wallet</option>
+            <option>Cheque</option>
+            <option>Cryptocurrency</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (Optional)</label>
+        <textarea class="form-textarea" id="txnNotes" placeholder="Additional details..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeTxnModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveTxn()">Save Transaction</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== ADD BILL / EMI MODAL (Features 2 & 3) ======================== -->
+<div class="modal-overlay" id="billModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Add Bill / EMI</h3>
+      <button class="modal-close" onclick="closeBillModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Bill / EMI Name</label>
+        <input type="text" class="form-input" id="billName" placeholder="e.g. Rent, Netflix, Car Loan EMI...">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Amount</label>
+          <input type="number" class="form-input" id="billAmount" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <!-- Feature 2: Exact due date instead of day number -->
+        <div class="form-group">
+          <label class="form-label">Next Due Date</label>
+          <input type="date" class="form-input" id="billDueDate">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="billCategory">
+            <option value="Rent">Rent</option>
+            <option value="Electricity">Electricity</option>
+            <option value="Internet">Internet</option>
+            <option value="Insurance">Insurance</option>
+            <option value="Subscription">Subscription</option>
+            <option value="Loan EMI">Loan EMI</option>
+            <option value="Taxes">Taxes</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <!-- Feature 2: Recurrence selector -->
+        <div class="form-group">
+          <label class="form-label">Recurrence</label>
+          <select class="form-select" id="billRecurrence" onchange="_updateInstallmentVisibility()">
+            <option value="once">One-time</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly" selected>Monthly</option>
+            <option value="bimonthly">Every 2 Months</option>
+            <option value="quarterly">Quarterly (3 Months)</option>
+            <option value="halfyear">Half-Yearly (6 Months)</option>
+            <option value="annual">Annually (1 Year)</option>
+          </select>
+        </div>
+      </div>
+      <!-- Total Installments (hidden for one-time) -->
+      <div class="form-group" id="billInstallmentsWrap">
+        <label class="form-label">Total Installments <span style="color:var(--text3);font-weight:400">(Optional — e.g. 12 for a 1-year monthly EMI)</span></label>
+        <input type="number" class="form-input" id="billTotalInstallments" placeholder="Leave blank for indefinite" min="1" step="1">
+      </div>
+      <!-- Feature 3: Status is auto-calculated — no manual status field -->
+      <div style="background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--gold);margin-bottom:16px">
+        ⚡ Status is automatically determined from the due date — Overdue, Due Soon, or Upcoming. Use <strong>Mark as Paid</strong> from the bill list to confirm each payment.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (Optional)</label>
+        <input type="text" class="form-input" id="billNotes" placeholder="Bank name, account info, plan details...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeBillModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveBill()">Save Bill</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== PAYMENT CONFIRMATION MODAL ======================== -->
+<div class="modal-overlay" id="payBillModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Confirm Payment</h3>
+      <button class="modal-close" onclick="closePayBillModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Bill summary -->
+      <div class="pay-bill-summary">
+        <div class="pay-bill-label">Bill / EMI</div>
+        <div class="pay-bill-name" id="payBillName">—</div>
+        <div class="pay-bill-amount" id="payBillAmt">—</div>
+      </div>
+      <input type="hidden" id="payBillId">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Payment Date</label>
+          <input type="date" class="form-input" id="payBillDate">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method <span style="color:var(--text3);font-weight:400">(Optional)</span></label>
+          <select class="form-select" id="payBillMethod">
+            <option value="">Select method</option>
+            <option>Cash</option>
+            <option>Bank Transfer</option>
+            <option>UPI / Digital Wallet</option>
+            <option>Debit Card</option>
+            <option>Credit Card</option>
+            <option>Cheque</option>
+            <option>Auto-debit</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes <span style="color:var(--text3);font-weight:400">(Optional)</span></label>
+        <input type="text" class="form-input" id="payBillNotes" placeholder="Reference number, bank name...">
+      </div>
+      <div style="background:var(--success-dim);border:1px solid rgba(39,174,96,0.25);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--success)">
+        ✓ Confirming payment will mark this bill as <strong>Paid</strong> and record the date. You can undo this from the bill list.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closePayBillModal()">Cancel</button>
+      <button class="btn-primary" style="background:var(--success);border-color:var(--success)" onclick="confirmBillPayment()">✓ Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== ADD GOAL MODAL ======================== -->
+<div class="modal-overlay" id="goalModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Create Savings Goal</h3>
+      <button class="modal-close" onclick="closeGoalModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Goal Name</label>
+        <input type="text" class="form-input" id="goalName" placeholder="e.g. Emergency Fund, New Car...">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Target Amount</label>
+          <input type="number" class="form-input" id="goalTarget" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount Saved So Far</label>
+          <input type="number" class="form-input" id="goalSaved" placeholder="0.00" min="0" step="0.01">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Target Date (Optional)</label>
+        <input type="date" class="form-input" id="goalDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description (Optional)</label>
+        <input type="text" class="form-input" id="goalDesc" placeholder="What are you saving for?">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeGoalModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveGoal()">Create Goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== UPDATE GOAL MODAL ======================== -->
+<div class="modal-overlay" id="updateGoalModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Update Goal Progress</h3>
+      <button class="modal-close" onclick="document.getElementById('updateGoalModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Current Saved Amount</label>
+        <input type="number" class="form-input" id="updateGoalSaved" placeholder="0.00" min="0" step="0.01">
+        <input type="hidden" id="updateGoalId">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="document.getElementById('updateGoalModal').classList.remove('open')">Cancel</button>
+      <button class="btn-primary" onclick="updateGoalProgress()">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon">✓</span>
+  <span class="toast-msg" id="toastMsg"></span>
+</div>
+
+<!-- ======================== SCRIPTS ======================== -->
+
+<!--
+  FEATURE 4 & 5 — FIREBASE AUTH + FIRESTORE
+  ==========================================
+  To enable cross-device login and cloud database:
+
+  1. Complete Firebase setup (see db.js for step-by-step guide)
+  2. Paste your Firebase config in BOTH db.js AND login.html
+  3. Uncomment the line below (remove the comment tags around the script tag)
+  4. That's it — auth guard and cloud sync are fully automatic
+
+  <script type="module" src="db.js"></script>
+
+  WHILE TESTING LOCALLY (before Firebase setup):
+  The app runs fine with localStorage — just open index.html directly.
+  logoutUser() is defined as a no-op below so the button doesn't error.
+-->
+
+<!-- Scripts load in order: export.js → app.js (both plain globals) → db.js (ES module) -->
+<!-- app.js must run before db.js so window.state and window.appBoot exist when Firebase auth fires -->
+<script src="export.js"></script>
+<script src="app.js"></script>
+<script type="module" src="db.js"></script>
+
+<script>
+  // Fallback logout — overridden by db.js when Firebase is active
+  if (typeof logoutUser === 'undefined') {
+    window.logoutUser = function() {
+      if (confirm('Sign out of AurumLedger?')) {
+        window.location.href = 'login.html';
+      }
+    };
+  }
+  const emailEl = document.getElementById('sidebarUserEmail');
+  if (emailEl && !emailEl.textContent) emailEl.style.display = 'none';
+</script>
+
+</body>
+</html>

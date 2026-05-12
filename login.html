@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AurumLedger — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-page">
+  <div class="login-card">
+
+    <!-- LOGO -->
+    <div class="login-logo">
+      <div class="login-logo-icon">⚜</div>
+      <div class="login-logo-text">AurumLedger</div>
+      <div class="login-logo-sub">Private Wealth Dashboard</div>
+    </div>
+
+    <!-- TABS -->
+    <div class="login-tabs" id="loginTabs">
+      <button class="login-tab active" onclick="switchPanel('signin')">Sign In</button>
+      <button class="login-tab" onclick="switchPanel('signup')">Create Account</button>
+    </div>
+
+    <!-- ===== SIGN IN PANEL ===== -->
+    <div class="login-panel active" id="panel-signin">
+      <div class="login-error" id="signinError"></div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="signinEmail" placeholder="your@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-icon-wrap">
+          <input type="password" class="form-input" id="signinPassword" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doSignIn()">
+          <button class="input-eye" onclick="togglePwd('signinPassword', this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;padding:13px;font-size:14px;margin-top:4px" onclick="doSignIn()" id="signinBtn">
+        Sign In
+      </button>
+      <div class="login-footer-text">
+        <a onclick="switchPanel('forgot')">Forgot your password?</a>
+      </div>
+    </div>
+
+    <!-- ===== SIGN UP PANEL ===== -->
+    <div class="login-panel" id="panel-signup">
+      <div class="login-error" id="signupError"></div>
+      <div class="login-success" id="signupSuccess"></div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="signupEmail" placeholder="your@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-icon-wrap">
+          <input type="password" class="form-input" id="signupPassword" placeholder="Min. 6 characters" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignUp()">
+          <button class="input-eye" onclick="togglePwd('signupPassword', this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <div class="input-icon-wrap">
+          <input type="password" class="form-input" id="signupConfirm" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignUp()">
+          <button class="input-eye" onclick="togglePwd('signupConfirm', this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;padding:13px;font-size:14px;margin-top:4px" onclick="doSignUp()" id="signupBtn">
+        Create Account
+      </button>
+      <div class="login-footer-text">
+        Already have an account? <a onclick="switchPanel('signin')">Sign in</a>
+      </div>
+    </div>
+
+    <!-- ===== FORGOT PASSWORD PANEL ===== -->
+    <div class="login-panel" id="panel-forgot">
+      <div style="margin-bottom:20px">
+        <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--text);margin-bottom:6px">Reset Password</div>
+        <div style="font-size:13px;color:var(--text3);line-height:1.6">Enter your email address and we'll send you a link to reset your password.</div>
+      </div>
+      <div class="login-error" id="forgotError"></div>
+      <div class="login-success" id="forgotSuccess"></div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="forgotEmail" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')doForgot()">
+      </div>
+      <button class="btn-primary" style="width:100%;padding:13px;font-size:14px" onclick="doForgot()" id="forgotBtn">
+        Send Reset Link
+      </button>
+      <div class="login-footer-text">
+        <a onclick="switchPanel('signin')">← Back to Sign In</a>
+      </div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="login-divider" style="margin-top:28px"><span>AurumLedger © 2025</span></div>
+
+  </div>
+</div>
+
+<!-- Non-module script: panel switching works immediately with onclick -->
+<script>
+// ---- Panel switching (must be non-module so onclick= attributes work) ----
+window.switchPanel = function(panel) {
+  document.querySelectorAll('.login-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + panel).classList.add('active');
+  if (panel === 'signin') document.querySelector('#loginTabs .login-tab:nth-child(1)').classList.add('active');
+  if (panel === 'signup') document.querySelector('#loginTabs .login-tab:nth-child(2)').classList.add('active');
+  document.querySelectorAll('.login-error, .login-success').forEach(el => el.classList.remove('show'));
+};
+
+window.togglePwd = function(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+};
+</script>
+
+<script type="module">
+// ---- Firebase imports ----
+import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, onAuthStateChanged,
+         signInWithEmailAndPassword,
+         createUserWithEmailAndPassword,
+         sendPasswordResetEmail }                 from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+// ============================================================
+// 🔑 PASTE YOUR FIREBASE CONFIG HERE (same as in db.js)
+// ============================================================
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyCjaQEHhhHO-07ncXOzNDz8LGDqhG9VwEQ",
+  authDomain:        "aurumledger-2fd29.firebaseapp.com",
+  projectId:         "aurumledger-2fd29",
+  storageBucket:     "aurumledger-2fd29.firebasestorage.app",
+  messagingSenderId: "275128373139",
+  appId:             "1:275128373139:web:ac5af13ea5aa262a752266"
+};
+// ============================================================
+
+const app  = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+
+// If already signed in → go to dashboard
+onAuthStateChanged(auth, (user) => {
+  if (user) window.location.href = 'index.html';
+});
+
+// ---- Helper: show error / success ----
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.add('show');
+}
+function showSuccess(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.add('show');
+}
+function hideMsg(id) { document.getElementById(id).classList.remove('show'); }
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.style.opacity = loading ? '0.7' : '1';
+  btn.textContent = loading ? 'Please wait…' : btn.dataset.label || btn.textContent;
+}
+
+// ---- Save original button labels ----
+['signinBtn','signupBtn','forgotBtn'].forEach(id => {
+  const b = document.getElementById(id);
+  if (b) b.dataset.label = b.textContent;
+});
+document.getElementById('signinBtn').dataset.label  = 'Sign In';
+document.getElementById('signupBtn').dataset.label  = 'Create Account';
+document.getElementById('forgotBtn').dataset.label  = 'Send Reset Link';
+
+// ---- Firebase error messages ----
+function friendlyError(code) {
+  const map = {
+    'auth/user-not-found':      'No account found with this email.',
+    'auth/wrong-password':      'Incorrect password. Please try again.',
+    'auth/invalid-email':       'Please enter a valid email address.',
+    'auth/email-already-in-use':'An account with this email already exists.',
+    'auth/weak-password':       'Password must be at least 6 characters.',
+    'auth/too-many-requests':   'Too many attempts. Please try again later.',
+    'auth/network-request-failed': 'Network error. Check your connection.',
+    'auth/invalid-credential':  'Invalid email or password.',
+  };
+  return map[code] || 'An error occurred. Please try again.';
+}
+
+// ---- Sign In ----
+window.doSignIn = async function() {
+  hideMsg('signinError');
+  const email = document.getElementById('signinEmail').value.trim();
+  const pass  = document.getElementById('signinPassword').value;
+  if (!email || !pass) { showErr('signinError', 'Please enter your email and password.'); return; }
+  setLoading('signinBtn', true);
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged will redirect to index.html
+  } catch (e) {
+    showErr('signinError', friendlyError(e.code));
+    setLoading('signinBtn', false);
+  }
+};
+
+// ---- Sign Up ----
+window.doSignUp = async function() {
+  hideMsg('signupError'); hideMsg('signupSuccess');
+  const email   = document.getElementById('signupEmail').value.trim();
+  const pass    = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupConfirm').value;
+  if (!email) { showErr('signupError', 'Please enter your email address.'); return; }
+  if (pass.length < 6) { showErr('signupError', 'Password must be at least 6 characters.'); return; }
+  if (pass !== confirm) { showErr('signupError', 'Passwords do not match.'); return; }
+  setLoading('signupBtn', true);
+  try {
+    await createUserWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged will redirect to index.html
+  } catch (e) {
+    showErr('signupError', friendlyError(e.code));
+    setLoading('signupBtn', false);
+  }
+};
+
+// ---- Forgot Password ----
+window.doForgot = async function() {
+  hideMsg('forgotError'); hideMsg('forgotSuccess');
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { showErr('forgotError', 'Please enter your email address.'); return; }
+  setLoading('forgotBtn', true);
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showSuccess('forgotSuccess', 'Reset link sent! Check your inbox (and spam folder).');
+  } catch (e) {
+    showErr('forgotError', friendlyError(e.code));
+  } finally {
+    setLoading('forgotBtn', false);
+  }
+};
+</script>
+</body>
+</html>
